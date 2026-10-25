@@ -45,7 +45,7 @@ async def cmd_shot(message: Message):
         # Грустное прощание
         await message.answer(f"🥀 *{user.full_name}* решил больше не бороться... Щелчок курка, тишина, и тело безвольно падает на холодный пол. Прощай, друг... 🪦", parse_mode="Markdown")
     except Exception as e:
-        await message.reply(f"*{user.full_name* попытался нажать на курок, но Гилберт перехватил стволы (возможно, ты администратор чата, тебя нельзя кикнуть!).", parse_mode="Markdown")
+        await message.reply(f"*{user.full_name}* попытался нажать на курок, но Гилберт перехватил стволы (возможно, ты администратор чата, тебя нельзя кикнуть!).", parse_mode="Markdown")
 
 @dp.message(Command("kick", ignore_case=True))
 async def cmd_kick(message: Message):
@@ -91,47 +91,5 @@ async def cmd_mute(message: Message):
         )
         await message.reply(f"🔇 Пользователь {user_to_mute.full_name} получил мут на 10 минут.")
     except Exception as e:
-        await message.reply(f"Не удалось выдать мут. Ошибка: {e}")
-
-# Команда /unmute (снимает мут)
-@dp.message(Command("unmute", ignore_case=True))
-async def cmd_unmute(message: Message):
-    if message.chat.type == "private":
-        await message.reply("Эту команду можно использовать только в беседах и группах!")
-        return
-
-    if not message.reply_to_message:
-        await message.reply("Пожалуйста, ответьте командой `/unmute` на сообщение пользователя, с которого нужно снять мут.")
-        return
-
-    user_to_unmute = message.reply_to_message.from_user
-    chat_id = message.chat.id
-
-    try:
-        await bot.restrict_chat_member(
-            chat_id=chat_id,
-            user_id=user_to_unmute.id,
-            permissions=types.ChatPermissions(
-                can_send_messages=True,
-                can_send_media_messages=True,
-                can_send_other_messages=True,
-                can_add_web_page_previews=True
-            )
-        )
-        await message.reply(f"🔊 С пользователя {user_to_unmute.full_name} снят мут.")
-    except Exception as e:
-        await message.reply(f"Не удалось снять мут. Ошибка: {e}")
-
-# Ловушка для подсчета всех сообщений в чате
-@dp.message()
-async def count_messages(message: Message):
-    global total_messages_count
-    total_messages_count += 1
-
-async def main():
-    print("Бот Гилберт успешно запущен со списком команд!")
-    await dp.start_polling(bot)
-
-if __name__ == "__main__":
-    asyncio.run(main())
-    
+        await message.reply(f"Не
+        
