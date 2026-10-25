@@ -22,10 +22,30 @@ async def cmd_shotgun(message: Message):
 async def cmd_st(message: Message):
     await message.reply(f"📊 Всего сообщений в чате: **{total_messages_count}**", parse_mode="Markdown")
 
-# Команда /money — замена рулетки, тоже показывает статистику сообщений
+# Команда /money — проверка количества сообщений
 @dp.message(Command("money", ignore_case=True))
 async def cmd_money(message: Message):
     await message.reply(f"💰 Всего сообщений в чате: **{total_messages_count}**", parse_mode="Markdown")
+
+# Команда /shot — самозастрел (гарантированный кик с грустным текстом)
+@dp.message(Command("shot", ignore_case=True))
+async def cmd_shot(message: Message):
+    if message.chat.type == "private":
+        await message.reply("Эту команду можно использовать только в беседах и группах!")
+        return
+
+    user = message.from_user
+    chat_id = message.chat.id
+
+    try:
+        # Сразу исключаем пользователя из чата
+        await bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
+        await bot.unban_chat_member(chat_id=chat_id, user_id=user.id)
+        
+        # Грустное прощание
+        await message.answer(f"🥀 *{user.full_name}* решил больше не бороться... Щелчок курка, тишина, и тело безвольно падает на холодный пол. Прощай, друг... 🪦", parse_mode="Markdown")
+    except Exception as e:
+        await message.reply(f"*{user.full_name* попытался нажать на курок, но Гилберт перехватил стволы (возможно, ты администратор чата, тебя нельзя кикнуть!).", parse_mode="Markdown")
 
 @dp.message(Command("kick", ignore_case=True))
 async def cmd_kick(message: Message):
@@ -109,7 +129,7 @@ async def count_messages(message: Message):
     total_messages_count += 1
 
 async def main():
-    print("Бот Гилберт успешно запущен!")
+    print("Бот Гилберт успешно запущен со списком команд!")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
