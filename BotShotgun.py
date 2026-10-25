@@ -9,10 +9,18 @@ TOKEN = "8946898500:AAF3tIqyyQJ83OW3xkXti_xMczPLOzdjovI"
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
+# Простой счётчик сообщений для текущей сессии бота
+total_messages_count = 0
+
 @dp.message(Command("Shotgun", ignore_case=True))
 async def cmd_shotgun(message: Message):
     text = "💥 **Дробовик заряжен!** Гилберт на связи и готов к действию!"
     await message.reply(text, parse_mode="Markdown")
+
+# Команда /stats — показывает, сколько всего сообщений написали
+@dp.message(Command("stats", ignore_case=True))
+async def cmd_stats(message: Message):
+    await message.reply(f"📊 Всего сообщений написано в чате за время работы бота: **{total_messages_count}**", parse_mode="Markdown")
 
 @dp.message(Command("kick", ignore_case=True))
 async def cmd_kick(message: Message):
@@ -58,9 +66,9 @@ async def cmd_mute(message: Message):
         )
         await message.reply(f"🔇 Пользователь {user_to_mute.full_name} получил мут на 10 минут.")
     except Exception as e:
-        await message.reply(f"Не удалось выдать мут. Убедитесь, что у бота права администратора.\nОшибка: {e}")
+        await message.reply(f"Не удалось выдать мут. Ошибка: {e}")
 
-# Команда /unmute (снимает мут и возвращает права)
+# Команда /unmute (снимает мут)
 @dp.message(Command("unmute", ignore_case=True))
 async def cmd_unmute(message: Message):
     if message.chat.type == "private":
@@ -75,7 +83,6 @@ async def cmd_unmute(message: Message):
     chat_id = message.chat.id
 
     try:
-        # Возвращаем стандартные права на отправку сообщений
         await bot.restrict_chat_member(
             chat_id=chat_id,
             user_id=user_to_unmute.id,
@@ -90,8 +97,14 @@ async def cmd_unmute(message: Message):
     except Exception as e:
         await message.reply(f"Не удалось снять мут. Ошибка: {e}")
 
+# Ловушка для всех остальных сообщений: считает каждое сообщение в чате
+@dp.message()
+async def count_messages(message: Message):
+    global total_messages_count
+    total_messages_count += 1
+
 async def main():
-    print("Бот Гилберт успешно запущен со всеми командами мута и кика!")
+    print("Бот Гилберт успешно запущен со счетчиком сообщений!")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
