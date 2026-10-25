@@ -1,5 +1,6 @@
 import asyncio
-from aiogram import Bot, Dispatcher
+from datetime import timedelta
+from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram.types import Message
 
@@ -19,39 +20,78 @@ async def cmd_kick(message: Message):
         await message.reply("Эту команду можно использовать только в беседах и группах!")
         return
 
-    user_to_kick = None
-
-    # Вариант 1: Если команда вызвана ответом на сообщение
-    if message.reply_to_message:
-        user_to_kick = message.reply_to_message.from_user
-    else:
-        # Вариант 2: Если написали через пробел (например, /kick @username или ID)
-        args = message.text.split(maxsplit=1)
-        if len(args) > 1:
-            target = args[1].strip()
-            try:
-                # Пробуем найти пользователя по юзернейму или ID
-                if target.startswith("@"):
-                    chat_member = await bot.get_chat_member(message.chat.id, target)
-                    user_to_kick = chat_member.user
-                else:
-                    user_to_kick = await bot.get_chat(target)
-            except Exception:
-                pass
-
-    if not user_to_kick:
-        await message.reply("Использование команды:\n1. Ответьте на сообщение пользователя командой `/kick`\n2. Или напишите: `/kick @username`")
+    if not message.reply_to_message:
+        await message.reply("Пожалуйста, ответьте командой `/kick` на сообщение пользователя, которого нужно исключить.")
         return
 
+    user_to_kick = message.reply_to_message.from_user
+    chat_id = message.chat.id
+
     try:
-        await bot.ban_chat_member(chat_id=message.chat.id, user_id=user_to_kick.id)
-        await bot.unban_chat_member(chat_id=message.chat.id, user_id=user_to_kick.id)
+        await bot.ban_chat_member(chat_id=chat_id, user_id=user_to_kick.id)
+        await bot.unban_chat_member(chat_id=chat_id, user_id=user_to_kick.id)
         await message.reply(f"🔨 Пользователь {user_to_kick.full_name} был исключен из чата.")
     except Exception as e:
-        await message.reply(f"Не удалось кикнуть пользователя. Проверьте права администратора у бота.\nОшибка: {e}")
+        await message.reply(f"Не удалось кикнуть пользователя. Ошибка: {e}")
+
+# Команда /mute (дает мут на 10 минут)
+@dp.message(Command("mute", ignore_case=True))
+async def cmd_mute(message: Message):
+    if message.chat.type == "private":
+        await message.reply("Эту команду можно использовать только в беседах и группах!")
+        return
+
+    if not message.reply_to_message:
+        await message.reply("Пожалуйста, ответьте командой `/mute` на сообщение пользователя, которого нужно замутить.")
+        return
+
+    user_to_mute = message.reply_to_message.from_user
+    chat_id = message.chat.id
+
+    try:
+        until_date = timedelta(minutes=10)
+        await bot.restrict_chat_member(
+            chat_id=chat_id,
+            user_id=user_to_mute.id,
+            permissions=types.ChatPermissions(can_send_messages=False),
+            until_date=until_date
+        )
+        await message.reply(f"🔇 Пользователь {user_to_mute.full_name} получил мут на 10 минут.")
+    except Exception as e:
+        await message.reply(f"Не удалось выдать мут. Убедитесь, что у бота права администратора.\nОшибка: {e}")
+
+# Команда /unmute (снимает мут и возвращает права)
+@dp.message(Command("unmute", ignore_case=True))
+async def cmd_unmute(message: Message):
+    if message.chat.type == "private":
+        await message.reply("Эту команду можно использовать только в беседах и группах!")
+        return
+
+    if not message.reply_to_message:
+        await message.reply("Пожалуйста, ответьте командой `/unmute` на сообщение пользователя, с которого нужно снять мут.")
+        return
+
+    user_to_unmute = message.reply_to_message.from_user
+    chat_id = message.chat.id
+
+    try:
+        # Возвращаем стандартные права на отправку сообщений
+        await bot.restrict_chat_member(
+            chat_id=chat_id,
+            user_id=user_to_unmute.id,
+            permissions=types.ChatPermissions(
+                can_send_messages=True,
+                can_send_media_messages=True,
+                can_send_other_messages=True,
+                can_add_web_page_previews=True
+            )
+        )
+        await message.reply(f"🔊 С пользователя {user_to_unmute.full_name} снят мут.")
+    except Exception as e:
+        await message.reply(f"Не удалось снять мут. Ошибка: {e}")
 
 async def main():
-    print("Бот Гилберт успешно запущен!")
+    print("Бот Гилберт успешно запущен со всеми командами мута и кика!")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
