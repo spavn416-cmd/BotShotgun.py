@@ -10,7 +10,6 @@ TOKEN = "8946898500:AAF3tIqyyQJ83OW3xkXti_xMczPLOzdjovI"
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# Счётчик сообщений для текущей сессии бота
 total_messages_count = 0
 
 @dp.message(Command("Shotgun", ignore_case=True))
@@ -18,12 +17,10 @@ async def cmd_shotgun(message: Message):
     text = "💥 **Дробовик заряжен!** Гилберт на связи и готов к действию!"
     await message.reply(text, parse_mode="Markdown")
 
-# Команда /st — быстрая проверка количества сообщений
 @dp.message(Command("st", ignore_case=True))
 async def cmd_st(message: Message):
     await message.reply(f"📊 Всего сообщений в чате: **{total_messages_count}**", parse_mode="Markdown")
 
-# Команда /money — русская рулетка (50% шанс кика) для того, кто написал
 @dp.message(Command("money", ignore_case=True))
 async def cmd_money(message: Message):
     if message.chat.type == "private":
@@ -32,7 +29,6 @@ async def cmd_money(message: Message):
 
     user = message.from_user
     chat_id = message.chat.id
-
     is_dead = random.choice([True, False])
 
     if is_dead:
@@ -40,12 +36,11 @@ async def cmd_money(message: Message):
             await bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
             await bot.unban_chat_member(chat_id=chat_id, user_id=user.id)
             await message.reply(f"🎯 Осечка... Дробовик Гилберта выстрелил. {user.full_name} вылетает из чата! 💥")
-        except Exception as e:
+        except Exception:
             await message.reply(f"Рулетка решила наказать {user.full_name}, но Гилберт не смог его кикнуть (возможно, ты администратор!).")
     else:
         await message.reply(f"😎 Щелчок... Пусто! {user.full_name} повезло, сегодня рулетка его пощадила.")
 
-# Команда /shot — самозастрел
 @dp.message(Command("shot", ignore_case=True))
 async def cmd_shot(message: Message):
     if message.chat.type == "private":
@@ -59,7 +54,7 @@ async def cmd_shot(message: Message):
         await bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
         await bot.unban_chat_member(chat_id=chat_id, user_id=user.id)
         await message.answer(f"🥀 *{user.full_name}* решил больше не бороться... Щелчок курка, тишина, и тело безвольно падает на холодный пол. Прощай, друг... 🪦", parse_mode="Markdown")
-    except Exception as e:
+    except Exception:
         await message.reply(f"*{user.full_name}* попытался нажать на курок, но Гилберт перехватил стволы (возможно, ты администратор чата!).", parse_mode="Markdown")
 
 @dp.message(Command("kick", ignore_case=True))
@@ -82,7 +77,6 @@ async def cmd_kick(message: Message):
     except Exception as e:
         await message.reply(f"Не удалось кикнуть пользователя. Ошибка: {e}")
 
-# Команда /mute (дает мут на 10 минут)
 @dp.message(Command("mute", ignore_case=True))
 async def cmd_mute(message: Message):
     if message.chat.type == "private":
@@ -108,7 +102,6 @@ async def cmd_mute(message: Message):
     except Exception as e:
         await message.reply(f"Не удалось выдать мут. Ошибка: {e}")
 
-# Команда /unmute (снимает мут)
 @dp.message(Command("unmute", ignore_case=True))
 async def cmd_unmute(message: Message):
     if message.chat.type == "private":
@@ -137,7 +130,6 @@ async def cmd_unmute(message: Message):
     except Exception as e:
         await message.reply(f"Не удалось снять мут. Ошибка: {e}")
 
-# Ловушка для подсчета всех сообщений в чате
 @dp.message()
 async def count_messages(message: Message):
     global total_messages_count
