@@ -21,9 +21,9 @@ async def cmd_shotgun(message: Message):
 async def cmd_st(message: Message):
     await message.reply(f"📊 Всего сообщений в чате: **{total_messages_count}**", parse_mode="Markdown")
 
-# Команда /money — русская рулетка (50% шанс кика)
-@dp.message(Command("money", ignore_case=True))
-async def cmd_money(message: Message):
+# Команда /roulet — русская рулетка (50% шанс кика)
+@dp.message(Command("roulet", ignore_case=True))
+async def cmd_roulet(message: Message):
     if message.chat.type == "private":
         await message.reply("Эту команду можно использовать только в беседах и группах!")
         return
