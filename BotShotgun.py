@@ -18,12 +18,12 @@ async def cmd_shotgun(message: Message):
     text = "💥 **Дробовик заряжен!** Гилберт на связи и готов к действию!"
     await message.reply(text, parse_mode="Markdown")
 
-# Команда /st — быстрая проверка количества сообщений (не трогаем)
+# Команда /st — быстрая проверка количества сообщений
 @dp.message(Command("st", ignore_case=True))
 async def cmd_st(message: Message):
     await message.reply(f"📊 Всего сообщений в чате: **{total_messages_count}**", parse_mode="Markdown")
 
-# Команда /money — теперь это русская рулетка (50% шанс кика) для того, кто написал
+# Команда /money — русская рулетка (50% шанс кика) для того, кто написал
 @dp.message(Command("money", ignore_case=True))
 async def cmd_money(message: Message):
     if message.chat.type == "private":
@@ -38,7 +38,7 @@ async def cmd_money(message: Message):
     if is_dead:
         try:
             await bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
-            await bot.unban_chat_member(chat_id=chat_id, user.id)
+            await bot.unban_chat_member(chat_id=chat_id, user_id=user.id)
             await message.reply(f"🎯 Осечка... Дробовик Гилберта выстрелил. {user.full_name} вылетает из чата! 💥")
         except Exception as e:
             await message.reply(f"Рулетка решила наказать {user.full_name}, но Гилберт не смог его кикнуть (возможно, ты администратор!).")
