@@ -1,4 +1,5 @@
 import asyncio
+import random
 from datetime import timedelta
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
@@ -17,17 +18,34 @@ async def cmd_shotgun(message: Message):
     text = "💥 **Дробовик заряжен!** Гилберт на связи и готов к действию!"
     await message.reply(text, parse_mode="Markdown")
 
-# Команда /st — быстрая проверка количества сообщений
+# Команда /st — быстрая проверка количества сообщений (не трогаем)
 @dp.message(Command("st", ignore_case=True))
 async def cmd_st(message: Message):
     await message.reply(f"📊 Всего сообщений в чате: **{total_messages_count}**", parse_mode="Markdown")
 
-# Команда /money — проверка количества сообщений
+# Команда /money — теперь это русская рулетка (50% шанс кика) для того, кто написал
 @dp.message(Command("money", ignore_case=True))
 async def cmd_money(message: Message):
-    await message.reply(f"💰 Всего сообщений в чате: **{total_messages_count}**", parse_mode="Markdown")
+    if message.chat.type == "private":
+        await message.reply("Эту команду можно использовать только в беседах и группах!")
+        return
 
-# Команда /shot — самозастрел (гарантированный кик с грустным текстом)
+    user = message.from_user
+    chat_id = message.chat.id
+
+    is_dead = random.choice([True, False])
+
+    if is_dead:
+        try:
+            await bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
+            await bot.unban_chat_member(chat_id=chat_id, user.id)
+            await message.reply(f"🎯 Осечка... Дробовик Гилберта выстрелил. {user.full_name} вылетает из чата! 💥")
+        except Exception as e:
+            await message.reply(f"Рулетка решила наказать {user.full_name}, но Гилберт не смог его кикнуть (возможно, ты администратор!).")
+    else:
+        await message.reply(f"😎 Щелчок... Пусто! {user.full_name} повезло, сегодня рулетка его пощадила.")
+
+# Команда /shot — самозастрел
 @dp.message(Command("shot", ignore_case=True))
 async def cmd_shot(message: Message):
     if message.chat.type == "private":
@@ -38,14 +56,11 @@ async def cmd_shot(message: Message):
     chat_id = message.chat.id
 
     try:
-        # Сразу исключаем пользователя из чата
         await bot.ban_chat_member(chat_id=chat_id, user_id=user.id)
         await bot.unban_chat_member(chat_id=chat_id, user_id=user.id)
-        
-        # Грустное прощание
         await message.answer(f"🥀 *{user.full_name}* решил больше не бороться... Щелчок курка, тишина, и тело безвольно падает на холодный пол. Прощай, друг... 🪦", parse_mode="Markdown")
     except Exception as e:
-        await message.reply(f"*{user.full_name}* попытался нажать на курок, но Гилберт перехватил стволы (возможно, ты администратор чата, тебя нельзя кикнуть!).", parse_mode="Markdown")
+        await message.reply(f"*{user.full_name}* попытался нажать на курок, но Гилберт перехватил стволы (возможно, ты администратор чата!).", parse_mode="Markdown")
 
 @dp.message(Command("kick", ignore_case=True))
 async def cmd_kick(message: Message):
@@ -91,5 +106,47 @@ async def cmd_mute(message: Message):
         )
         await message.reply(f"🔇 Пользователь {user_to_mute.full_name} получил мут на 10 минут.")
     except Exception as e:
-        await message.reply(f"Не
-        
+        await message.reply(f"Не удалось выдать мут. Ошибка: {e}")
+
+# Команда /unmute (снимает мут)
+@dp.message(Command("unmute", ignore_case=True))
+async def cmd_unmute(message: Message):
+    if message.chat.type == "private":
+        await message.reply("Эту команду можно использовать только в беседах и группах!")
+        return
+
+    if not message.reply_to_message:
+        await message.reply("Пожалуйста, ответьте командой `/unmute` на сообщение пользователя, с которого нужно снять мут.")
+        return
+
+    user_to_unmute = message.reply_to_message.from_user
+    chat_id = message.chat.id
+
+    try:
+        await bot.restrict_chat_member(
+            chat_id=chat_id,
+            user_id=user_to_unmute.id,
+            permissions=types.ChatPermissions(
+                can_send_messages=True,
+                can_send_media_messages=True,
+                can_send_other_messages=True,
+                can_add_web_page_previews=True
+            )
+        )
+        await message.reply(f"🔊 С пользователя {user_to_unmute.full_name} снят мут.")
+    except Exception as e:
+        await message.reply(f"Не удалось снять мут. Ошибка: {e}")
+
+# Ловушка для подсчета всех сообщений в чате
+@dp.message()
+async def count_messages(message: Message):
+    global total_messages_count
+    total_messages_count += 1
+
+async def main():
+    print("Бот Гилберт успешно запущен!")
+    await dp.start_polling(bot)
+
+if __name__ == "__main__":
+    asyncio.run(main())
+    
