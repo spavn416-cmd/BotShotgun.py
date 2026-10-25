@@ -16,10 +16,12 @@ total_messages_count = 0
 async def cmd_shotgun(message: Message):
     await message.reply("💥 **Дробовик заряжен!** Гилберт на связи и готов к действию!", parse_mode="Markdown")
 
+# Команда /st — счётчик сообщений
 @dp.message(Command("st", ignore_case=True))
 async def cmd_st(message: Message):
     await message.reply(f"📊 Всего сообщений в чате: **{total_messages_count}**", parse_mode="Markdown")
 
+# Команда /money — русская рулетка (50% шанс кика)
 @dp.message(Command("money", ignore_case=True))
 async def cmd_money(message: Message):
     if message.chat.type == "private":
@@ -40,6 +42,7 @@ async def cmd_money(message: Message):
     else:
         await message.reply(f"😎 Щелчок... Пусто! {user.full_name} повезло, сегодня рулетка его пощадила.")
 
+# Команда /shot — самозастрел
 @dp.message(Command("shot", ignore_case=True))
 async def cmd_shot(message: Message):
     if message.chat.type == "private":
@@ -140,4 +143,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-  
+    
